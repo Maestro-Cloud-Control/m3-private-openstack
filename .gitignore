@@ -1,0 +1,27 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# IDE garbage
+*.iml
+**/*.iml
+*.ipr
+**/*.ipr
+*.iws
+**/*.iws
+*.project
+*.classpath
+
+# Ignore idea settings
+.idea/
+**/*/*.iml
+**/.idea/*
+out/
+build/*
+
+# Ignore target directories
+target/
+**/target/*
