@@ -37,8 +37,6 @@ import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkVlanResponse;
 import io.maestro3.sdk.v3.request.agent.ActivateVLANRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +46,6 @@ import java.util.stream.Collectors;
 
 @Component
 public class OsActivateVLANHandler extends AbstractM3ApiHandler<ActivateVLANRequest, SdkVlanResponse> {
-
-    private static final Logger LOG = LogManager.getLogger(OsActivateVLANHandler.class);
 
     private IAdminVLANService adminVLANService;
     private IOpenStackRegionRepository regionRepository;

@@ -31,8 +31,6 @@ import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkStaticIpAddress;
 import io.maestro3.sdk.v3.request.agent.DescribeStaticIpsRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,8 +39,6 @@ import java.util.List;
 
 @Component
 public class OsDescribeIpsHandler extends AbstractM3ApiHandler<DescribeStaticIpsRequest, List<SdkStaticIpAddress>> {
-
-    private static final Logger LOG = LogManager.getLogger(OsDescribeIpsHandler.class);
 
     private IOpenStackRegionRepository regionRepository;
     private IOpenStackTenantRepository tenantRepository;

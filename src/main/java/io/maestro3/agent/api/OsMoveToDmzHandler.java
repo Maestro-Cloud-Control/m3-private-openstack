@@ -38,15 +38,11 @@ import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkVlanResponse;
 import io.maestro3.sdk.v3.request.agent.MoveToDmzRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OsMoveToDmzHandler extends AbstractM3ApiHandler<MoveToDmzRequest, SdkVlanResponse> {
-
-    private static final Logger LOG = LogManager.getLogger(OsMoveToDmzHandler.class);
 
     // for setup VLAN name to instances, turned back to default VLAN
     private static final String DEFAULT_VLAN_NAME = "Server Network";

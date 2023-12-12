@@ -28,15 +28,11 @@ import io.maestro3.agent.service.IVirtOpenStackNetworkService;
 import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.request.agent.DeallocateStaticIpRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OsReleaseIpHandler extends AbstractM3ApiHandler<DeallocateStaticIpRequest, Boolean> {
-
-    private static final Logger LOG = LogManager.getLogger(OsReleaseIpHandler.class);
 
     private IOpenStackRegionRepository regionRepository;
     private IOpenStackTenantRepository tenantRepository;

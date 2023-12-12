@@ -27,22 +27,15 @@ import io.maestro3.agent.model.tenant.OpenStackTenant;
 import io.maestro3.agent.service.IOpenStackNetworkingProvider;
 import io.maestro3.agent.service.IServiceFactory;
 import io.maestro3.agent.service.IVirtOpenStackNetworkService;
-import io.maestro3.sdk.internal.util.JsonUtils;
 import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkStaticIpAddress;
 import io.maestro3.sdk.v3.request.agent.AllocateIpRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 @Component
 public class OsAllocateIpHandler extends AbstractM3ApiHandler<AllocateIpRequest, SdkStaticIpAddress> {
-
-    private static final Logger LOG = LogManager.getLogger(OsAllocateIpHandler.class);
 
     private IOpenStackRegionRepository regionRepository;
     private IOpenStackTenantRepository tenantRepository;

@@ -620,6 +620,7 @@ public class OpenStackSecurityGroupService implements IOpenStackSecurityGroupSer
                 List<CreateSecurityGroupRule> secureConnectionProtocolRules =
                     getSecureConnectionProtocolRules(projectId, securityGroupId);
                 result.addAll(secureConnectionProtocolRules);
+                break;
             default:
                 break;
         }
@@ -675,6 +676,7 @@ public class OpenStackSecurityGroupService implements IOpenStackSecurityGroupSer
             case PRIVATE:
                 CreateSecurityGroupRule openStackMetadata = getOpenStackMetadataRule(projectId, securityGroupId);
                 result.add(openStackMetadata);
+                break;
             default:
                 break;
         }

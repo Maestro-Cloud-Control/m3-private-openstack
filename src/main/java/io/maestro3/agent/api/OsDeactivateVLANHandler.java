@@ -42,8 +42,6 @@ import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkVlanResponse;
 import io.maestro3.sdk.v3.request.agent.DeactivateVLANRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,8 +49,6 @@ import java.util.List;
 
 @Component
 public class OsDeactivateVLANHandler extends AbstractM3ApiHandler<DeactivateVLANRequest, SdkVlanResponse> {
-
-    private static final Logger LOG = LogManager.getLogger(OsDeactivateVLANHandler.class);
 
     private IOpenStackRegionRepository regionRepository;
     private IOpenStackTenantRepository tenantRepository;

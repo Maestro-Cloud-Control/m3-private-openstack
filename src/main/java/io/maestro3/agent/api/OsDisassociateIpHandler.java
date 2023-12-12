@@ -31,15 +31,11 @@ import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.agent.network.SdkStaticIpAddress;
 import io.maestro3.sdk.v3.request.agent.DisassociateStaticIpRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class OsDisassociateIpHandler extends AbstractM3ApiHandler<DisassociateStaticIpRequest, SdkStaticIpAddress> {
-
-    private static final Logger LOG = LogManager.getLogger(OsDisassociateIpHandler.class);
 
     private IOpenStackRegionRepository regionRepository;
     private IOpenStackTenantRepository tenantRepository;

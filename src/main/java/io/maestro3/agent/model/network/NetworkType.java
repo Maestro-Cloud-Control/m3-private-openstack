@@ -23,7 +23,7 @@ public enum NetworkType {
     HYBRID("Hybrid"),
     SECURED("Secured");
 
-    public static final NetworkType[] VALUES = values();
+    private static final NetworkType[] ALL_TYPES = values();
     private final String title;
 
     NetworkType(String title) {
@@ -31,7 +31,7 @@ public enum NetworkType {
     }
 
     public static NetworkType fromName(String name) {
-        for (NetworkType networkType : VALUES) {
+        for (NetworkType networkType : ALL_TYPES) {
             if (networkType.name().equalsIgnoreCase(name)) {
                 return networkType;
             }
