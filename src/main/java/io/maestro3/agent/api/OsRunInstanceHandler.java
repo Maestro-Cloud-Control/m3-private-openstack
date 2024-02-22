@@ -51,10 +51,19 @@ import io.maestro3.agent.service.IServiceFactory;
 import io.maestro3.agent.service.MachineImageDbService;
 import io.maestro3.agent.service.ServerDbService;
 import io.maestro3.agent.service.TenantDbService;
+import io.maestro3.chef.client.context.IChefContext;
+import io.maestro3.chef.client.context.IChefContextFactory;
+import io.maestro3.chef.model.ChefRoleInfo;
+import io.maestro3.chef.model.OsType;
+import io.maestro3.chef.model.script.InitScript;
+import io.maestro3.chef.provider.IInitScriptsProvider;
+import io.maestro3.chef.service.IAutoconfigurationFacade;
+import io.maestro3.chef.service.IChefInfoService;
 import io.maestro3.sdk.v3.core.ActionType;
 import io.maestro3.sdk.v3.core.M3ApiAction;
 import io.maestro3.sdk.v3.core.M3RawResult;
 import io.maestro3.sdk.v3.core.M3Result;
+import io.maestro3.sdk.v3.model.SdkCloud;
 import io.maestro3.sdk.v3.model.instance.SdkInstances;
 import io.maestro3.sdk.v3.model.instance.SdkOpenStackInstance;
 import io.maestro3.sdk.v3.request.instance.RunInstanceRequest;
@@ -65,8 +74,11 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -77,16 +89,26 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
     private final ResourceNameGenerator resourceNameGenerator;
     private final IServiceFactory<IOpenStackInstanceProvisioningValidationService> validationServiceFactory;
     private final IServiceFactory<IOpenStackNetworkingProvider> networkingServiceFactory;
+    private final IAutoconfigurationFacade autoconfigurationFacade;
+    private final IChefInfoService chefInfoService;
+    private final IChefContextFactory chefContextFactory;
+    private final IInitScriptsProvider initScriptsProvider;
 
     @Autowired
     public OsRunInstanceHandler(IOpenStackRegionRepository regionDbService, TenantDbService tenantDbService,
                                 MachineImageDbService machineImageDbService,
+                                IAutoconfigurationFacade autoconfigurationFacade, IInitScriptsProvider initScriptsProvider,
+                                IChefInfoService chefInfoService, IChefContextFactory chefContextFactory,
                                 ServerDbService serverDbService, ResourceNameGenerator resourceNameGenerator,
                                 OpenStackApiProvider openStackApiProvider, @Qualifier("instanceLocker") Locker locker,
                                 IServiceFactory<IOpenStackInstanceProvisioningValidationService> validationServiceFactory,
                                 IServiceFactory<IOpenStackNetworkingProvider> networkingServiceFactory) {
         super(regionDbService, tenantDbService, serverDbService, openStackApiProvider, locker);
         this.validationServiceFactory = validationServiceFactory;
+        this.initScriptsProvider = initScriptsProvider;
+        this.chefContextFactory = chefContextFactory;
+        this.autoconfigurationFacade = autoconfigurationFacade;
+        this.chefInfoService = chefInfoService;
         this.networkingServiceFactory = networkingServiceFactory;
         this.machineImageDbService = machineImageDbService;
         this.resourceNameGenerator = resourceNameGenerator;
@@ -94,18 +116,18 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
 
     @Override
     public M3RawResult handle(M3ApiAction action) throws M3PrivateAgentException {
-
+        action.getParams().put("insanceChefUuid", UUID.randomUUID().toString());
         RunInstanceRequest request = M3ApiActionInverter.toRunInstanceRequest(action);
 
         OpenStackRegionConfig region = regionDbService.findByAliasInCloud(request.getRegion());
         OpenStackTenant tenant = tenantDbService.findOpenStackTenantByNameAndRegion(request.getTenantName(), region.getId());
         if (tenant == null) {
             throw new ReadableAgentException(String.format("Tenant is not configured for alias %s in region %s",
-                request.getTenantName(), request.getRegion()));
+                    request.getTenantName(), request.getRegion()));
         }
         String serverName = resourceNameGenerator.generateNewServerName(region);
         OpenStackMachineImage machineImage = machineImageDbService.findOpenStackImageByAliasForProject(request.getImageId(),
-            tenant.getId(), region.getId());
+                tenant.getId(), region.getId());
         if (machineImage == null) {
             throw new ReadableAgentException("Image is not configured for alias " + request.getImageId());
         }
@@ -119,18 +141,26 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
         if (flavor == null) {
             throw new ReadableAgentException("Shape not configured for alias " + request.getShape());
         }
-
-        String rawScript = StringUtils.isNotBlank(request.getInitScript()) ? request.getInitScript() : StringUtils.EMPTY;
+        String requestInitScript = request.getInitScript();
+        if (StringUtils.isBlank(requestInitScript) && chefInfoService.isChefEnabled()) {
+            Map<String, String> chefParams = new HashMap<>();
+            chefParams.put(IChefInfoService.INSTALL_CHEF_CLIENT, "true");
+            InitScript initScript = initScriptsProvider.provideInitScript(tenant.getTenantAlias(), region.getRegionAlias(), "ALL",
+                    chefParams, OsType.fromName(machineImage.getPlatformType().name()));
+            requestInitScript = initScriptsProvider.replaceInstanceParameters(initScript, chefParams,
+                    request.getInsanceChefUuid());
+        }
+        String rawScript = StringUtils.isNotBlank(requestInitScript) ? requestInitScript : StringUtils.EMPTY;
         byte[] bytes = rawScript.getBytes(StandardCharsets.UTF_8);
 
         String utf8EncodedScript = BaseEncoding.base64().encode(bytes);
 
         ServerBootInfo.Builder bootInfoBuilder = ServerBootInfo.builder()
-            .server(serverName) // internal
-            .ofImage(machineImage.getNativeId())
-            .withFlavor(flavor.getNativeId())
-            .withDiskConfig(region.getServerDiskConfig())
-            .withUserData(utf8EncodedScript);
+                .server(serverName) // internal
+                .ofImage(machineImage.getNativeId())
+                .withFlavor(flavor.getNativeId())
+                .withDiskConfig(region.getServerDiskConfig())
+                .withUserData(utf8EncodedScript);
 
         if (machineImage.getPlatformType() != PlatformType.WIN) {
             bootInfoBuilder.withKey(request.getKeyName());
@@ -138,7 +168,7 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
 
         if (region.getOsVersion() == OpenStackVersion.OCATA) {
             bootInfoBuilder.withDeviceMapping(
-                BlockDeviceMappingV2.fromImageToVolume(flavor.getDiskSizeMb(), machineImage.getNativeId()));
+                    BlockDeviceMappingV2.fromImageToVolume(flavor.getDiskSizeMb(), machineImage.getNativeId()));
             bootInfoBuilder.useConfigDrive();
         }
         IOpenStackInstanceProvisioningValidationService validationService = validationServiceFactory.get(region);
@@ -155,14 +185,35 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
 
         Server server = bootServer(openStackApiProvider, region, tenant, bootInfoBuilder, networkConfiguration);
         locker.executeOperation(tenant.getId(), (VoidOperation<M3PrivateAgentException>) () ->
-            saveServerConfig(tenant, server, bootInfoBuilder.create()));
+                saveServerConfig(tenant, server, bootInfoBuilder.create()));
 
         SdkOpenStackInstance m3SdkInstance = M3SDKModelConverter.toSdkOpenStackInstance(
-            request, serverName, region, tenant, machineImage, server, flavor);
+                request, serverName, region, tenant, machineImage, server, flavor);
+
         SdkInstances result = new SdkInstances();
         result.setSdkInstances(Collections.singletonList(m3SdkInstance));
-
+        if (chefInfoService.isChefEnabled() && StringUtils.isNotBlank(request.getChefProfile())) {
+            IChefContext chefContext = chefContextFactory.getInstance(tenant.getTenantAlias(), region.getRegionAlias());
+            validateChefRoleName(request, chefContext);
+            try {
+                autoconfigurationFacade.autoconfigurationPostprocessing(
+                        request, request.getOwner(), region.getRegionAlias(), region.getId(), tenant.getTenantAlias(),
+                        tenant.getTenantAlias(), chefContext, SdkCloud.OPEN_STACK.name(), result);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to process autoconfiguration", e);
+            }
+        }
         return M3Result.success(action.getId(), result);
+    }
+
+    private void validateChefRoleName(RunInstanceRequest request, IChefContext chefContext) {
+        String chefRoleName = request.getChefProfile();
+        Set<String> configurationRoleNames = chefContext.getRoles().stream()
+                .map(ChefRoleInfo::getRoleName)
+                .collect(Collectors.toSet());
+        if (!configurationRoleNames.contains(chefRoleName)) {
+            throw new RuntimeException("Chef role not found for role name " + chefRoleName);
+        }
     }
 
     private void saveServerConfig(OpenStackTenant tenant,
@@ -181,9 +232,9 @@ public class OsRunInstanceHandler extends AbstractInstanceHandler implements IM3
         serverConfig.setStartTime(System.currentTimeMillis());
         serverConfig.setOur(true);
         serverConfig.setSecurityGroups(
-            server.getSecurityGroups().stream()
-                .map(SecurityInfo::getName)
-                .collect(Collectors.toList()));
+                server.getSecurityGroups().stream()
+                        .map(SecurityInfo::getName)
+                        .collect(Collectors.toList()));
 
         OpenStackNetworkInterfaceInfo networkInterfaceInfo = new OpenStackNetworkInterfaceInfo();
         networkInterfaceInfo.setNetworkId(tenant.getNetworkId());
