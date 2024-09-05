@@ -48,7 +48,6 @@ import io.maestro3.agent.service.IVLANService;
 import io.maestro3.agent.service.IVirtOpenStackNetworkService;
 import io.maestro3.agent.service.ServerDbService;
 import io.maestro3.agent.util.ConversionUtils;
-import io.maestro3.agent.util.OsIpUtils;
 import io.maestro3.agent.util.OpenStackConversionUtils;
 import io.maestro3.agent.util.OpenStackNetworkUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +57,6 @@ import org.joda.time.DateTime;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -237,7 +235,7 @@ abstract class OpenStackNetworkService implements IVirtOpenStackNetworkService {
             return true;
         }
         DisassociateOpenStackStaticIpAddressParameters disassociateOpenStackStaticIpAddressParameters =
-            (DisassociateOpenStackStaticIpAddressParameters) parameters;
+                (DisassociateOpenStackStaticIpAddressParameters) parameters;
         return disassociateOpenStackStaticIpAddressParameters.isRefreshInstanceAfter();
     }
 
@@ -258,8 +256,6 @@ abstract class OpenStackNetworkService implements IVirtOpenStackNetworkService {
                 releaseStaticIp(project, openStackStaticIp);
             }
             staticIpService.delete(openStackStaticIp);
-            openStackSecurityGroupService.updateProjectDefaultSecurityGroup(
-                project, null, Collections.singleton(OsIpUtils.convertSingleIpAddr(staticIp)));
         } catch (OSClientException e) {
             LOG.error("Unable to release static IP.", e);
             handle(e);
@@ -281,7 +277,7 @@ abstract class OpenStackNetworkService implements IVirtOpenStackNetworkService {
     public void updateStaticIps() {
         List<OpenStackTenant> projects = projectService.findByRegionIdInCloud(zone.getId());
         projects.forEach(
-            updateStaticIpsProcessor::process
+                updateStaticIpsProcessor::process
         );
     }
 

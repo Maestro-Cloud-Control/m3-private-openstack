@@ -107,8 +107,7 @@ public class OsDescribeImagesHandler implements IM3ApiHandler {
 
     private List<Image> describeImage(OpenStackRegionConfig region, OpenStackTenant tenant) throws M3PrivateAgentException {
         try {
-            return openStackApiProvider.openStack(tenant, region).images().image().listProject(tenant.getId());
-
+            return openStackApiProvider.openStack(tenant, region).images().image().listProject(tenant.getNativeId());
         } catch (OSClientException | M3PrivateAgentException e) {
             LOG.error(e.getMessage(), e);
             throw new M3PrivateAgentException(e.getMessage());

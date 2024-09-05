@@ -30,4 +30,6 @@ public interface IOpenStackTenantRepository extends ITenantRepository<OpenStackT
     List<OpenStackTenant> findAllByRegion(String regionId, Collection<String> tenantAliases);
 
     void updateProjectsNetworkId(String regionId, String oldNetworkId, String newNetworkId);
+
+    Collection<OpenStackTenant> findProjectsWithSecurityMode(String regionId, String modeName);
 }

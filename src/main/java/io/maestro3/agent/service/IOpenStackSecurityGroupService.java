@@ -17,34 +17,21 @@
 
 package io.maestro3.agent.service;
 
-import io.maestro3.agent.model.network.SecurityGroupType;
-import io.maestro3.agent.model.network.impl.ProjectSource;
+import io.maestro3.agent.model.network.SecurityModeConfiguration;
 import io.maestro3.agent.model.region.OpenStackRegionConfig;
 import io.maestro3.agent.model.server.OpenStackServerConfig;
 import io.maestro3.agent.model.tenant.OpenStackTenant;
-import io.maestro3.agent.openstack.api.IOpenStackApi;
-import io.maestro3.agent.openstack.api.networking.bean.SecurityGroup;
-
-import java.util.Collection;
-import java.util.Set;
 
 
 public interface IOpenStackSecurityGroupService {
 
-    SecurityGroup setupProjectSecurityGroup(OpenStackRegionConfig zone, OpenStackTenant project, boolean personalTenant);
+    boolean isSecurityGroupExist(OpenStackRegionConfig region, String securityGroupId);
 
-    void createOrUpdateAdminSecurityGroup(OpenStackRegionConfig zone, SecurityGroupType securityGroupType);
+    void updateSecurityType(OpenStackTenant project, OpenStackRegionConfig zone, SecurityModeConfiguration newModeConfig);
 
-
-    SecurityGroup createEmptySecurityGroup(String OpenStackTenantName, String OpenStackTenantId, IOpenStackApi api, String sgName, String description);
-
-    void updateSecurityType(OpenStackTenant project, OpenStackRegionConfig zone, Set<SecurityGroupType> newSecurityGroupTypes);
-
-    void attachAdminSecurityGroup(OpenStackTenant project, OpenStackRegionConfig zone, String instanceId);
+    void attachAdminSecurityGroup(OpenStackTenant project, OpenStackRegionConfig zone, OpenStackServerConfig instance);
 
     void changeSecurityGroupAfterInstanceMovedToAnotherProject(OpenStackServerConfig instance,
                                                                OpenStackTenant project,
                                                                OpenStackRegionConfig zone);
-
-    void updateProjectDefaultSecurityGroup(OpenStackTenant project, Collection<ProjectSource> sourcesToAdd, Collection<String> sourcesToRemove);
 }

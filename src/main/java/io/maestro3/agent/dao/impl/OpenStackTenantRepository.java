@@ -48,7 +48,7 @@ public class OpenStackTenantRepository extends BaseTenantDao<OpenStackTenant> im
     public OpenStackTenant findByNativeId(String nativeId) {
         Assert.hasLength(nativeId, "nativeId cannot be null or empty");
         Criteria searchCriteria = Criteria.where("nativeId").is(nativeId)
-            .and("cloud").is(cloudType.toString());
+                .and("cloud").is(cloudType.toString());
         return template.findOne(Query.query(searchCriteria), OpenStackTenant.class, COLLECTION);
     }
 
@@ -58,8 +58,8 @@ public class OpenStackTenantRepository extends BaseTenantDao<OpenStackTenant> im
         Assert.notEmpty(tenantAliases, "tenantAliases cannot be null or empty");
 
         Criteria searchCriteria = Criteria.where("regionId").is(regionId)
-            .and("nameAlias").in(tenantAliases)
-            .and("cloud").is(cloudType.toString());
+                .and("nameAlias").in(tenantAliases)
+                .and("cloud").is(cloudType.toString());
 
         return template.find(Query.query(searchCriteria), OpenStackTenant.class, COLLECTION);
     }
@@ -72,5 +72,14 @@ public class OpenStackTenantRepository extends BaseTenantDao<OpenStackTenant> im
 
         Criteria criteria = where("regionId").is(regionId).and("networkId").is(oldNetworkId);
         template.updateMulti(query(criteria), Update.update("networkId", newNetworkId), COLLECTION);
+    }
+
+    @Override
+    public Collection<OpenStackTenant> findProjectsWithSecurityMode(String regionId, String modeName) {
+        Assert.hasText(regionId, "regionId should not be null or empty.");
+        Assert.hasText(modeName, "modeName should not be null or empty.");
+
+        Criteria criteria = where("regionId").is(regionId).and("securityMode").is(modeName);
+        return template.find(query(criteria), OpenStackTenant.class, COLLECTION);
     }
 }

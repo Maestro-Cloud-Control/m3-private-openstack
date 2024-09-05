@@ -20,7 +20,6 @@ package io.maestro3.agent.dao.impl;
 import io.maestro3.agent.dao.IOpenStackCustomSecurityConfigDao;
 import io.maestro3.agent.model.network.Direction;
 import io.maestro3.agent.model.network.SecurityConfigType;
-import io.maestro3.agent.model.network.SecurityGroupType;
 import io.maestro3.agent.model.network.impl.SecurityGroupExtension;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
@@ -41,12 +40,9 @@ public class OpenStackCustomSecurityConfigDao extends CustomSecurityConfigDao<Se
     }
 
     @Override
-    public List<SecurityGroupExtension> find(Set<String> zoneIds, SecurityGroupType securityGroupType, Direction direction) {
+    public List<SecurityGroupExtension> find(Set<String> zoneIds, Direction direction) {
         Assert.notEmpty(zoneIds, "zoneIds can't be null or empty.");
         Criteria criteria = where("type").is(SecurityConfigType.OPEN_STACK).and("zoneId").in(zoneIds);
-        if (securityGroupType != null) {
-            criteria.and("securityGroupType").is(securityGroupType);
-        }
         if (direction != null) {
             criteria.and("direction").is(direction);
         }

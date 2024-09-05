@@ -18,19 +18,14 @@
 package io.maestro3.agent.model.tenant;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.Sets;
 import io.maestro3.agent.model.OpenStackUserInfo;
 import io.maestro3.agent.model.base.BaseTenant;
 import io.maestro3.agent.model.base.PrivateCloudType;
 import io.maestro3.agent.model.network.NetworkType;
-import io.maestro3.agent.model.network.SecurityGroupType;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
-
-
 
 @Document(collection = "Tenants")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -52,7 +47,7 @@ public class OpenStackTenant extends BaseTenant {
     private OpenStackUserInfo userInfo;
     private String domainName;
     private NetworkType networkType = NetworkType.DEFAULT;
-    private Set<SecurityGroupType> securityGroupTypes = Sets.newHashSet(SecurityGroupType.PUBLIC);
+    private String securityMode;
 
     public OpenStackTenant() {
         super(PrivateCloudType.OPEN_STACK);
@@ -123,26 +118,25 @@ public class OpenStackTenant extends BaseTenant {
         return this;
     }
 
-    public Set<SecurityGroupType> getSecurityGroupTypes() {
-        return securityGroupTypes;
+    public String getSecurityMode() {
+        return securityMode;
     }
 
-    public OpenStackTenant setSecurityGroupTypes(Set<SecurityGroupType> securityGroupTypes) {
-        this.securityGroupTypes = securityGroupTypes;
-        return this;
+    public void setSecurityMode(String securityMode) {
+        this.securityMode = securityMode;
     }
 
     @Override
     public String toString() {
         return "OpenStackTenant{" +
-            "nativeId='" + nativeId + '\'' +
-            ", networkId='" + networkId + '\'' +
-            ", nativeName='" + nativeName + '\'' +
-            ", securityGroupId='" + securityGroupId + '\'' +
-            ", securityGroupName='" + securityGroupName + '\'' +
-            ", userdataTemplateId='" + userdataTemplateId + '\'' +
-            ", userInfo=" + userInfo +
-            '}';
+                "nativeId='" + nativeId + '\'' +
+                ", networkId='" + networkId + '\'' +
+                ", nativeName='" + nativeName + '\'' +
+                ", securityGroupId='" + securityGroupId + '\'' +
+                ", securityGroupName='" + securityGroupName + '\'' +
+                ", userdataTemplateId='" + userdataTemplateId + '\'' +
+                ", userInfo=" + userInfo +
+                '}';
     }
 
     public String getDomainName() {

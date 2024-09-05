@@ -45,6 +45,7 @@ import io.maestro3.agent.openstack.exception.OSClientException;
 import io.maestro3.agent.openstack.provider.OpenStackApiProvider;
 import io.maestro3.agent.scheduler.AbstractScheduler;
 import io.maestro3.agent.service.DbServicesProvider;
+import io.maestro3.agent.service.IOpenStackSecurityGroupService;
 import io.maestro3.agent.service.VolumeDbService;
 import io.maestro3.cadf.ICadfAction;
 import io.maestro3.cadf.model.CadfActions;
@@ -90,7 +91,8 @@ public class OpenStackAgentRegularScheduler extends AbstractScheduler {
     private final CadfAuditEventSender auditEventSender;
     private final Locker locker;
     private final IInstanceRunRecordDao instanceRunRecordDao;
-    private IOpenStackRegionRepository regionService;
+    private final IOpenStackRegionRepository regionService;
+    private final IOpenStackSecurityGroupService securityGroupService;
 
     @Value("${flag.enable.instances.schedule.describer}")
     private boolean enableInstancesScheduledDescribers;
@@ -101,7 +103,8 @@ public class OpenStackAgentRegularScheduler extends AbstractScheduler {
                                           DbServicesProvider dbServicesProvider,
                                           IInstanceRunRecordDao instanceRunRecordDao,
                                           CadfAuditEventSender auditEventSender,
-                                          @Qualifier("instanceLocker") Locker locker) {
+                                          @Qualifier("instanceLocker") Locker locker,
+                                          IOpenStackSecurityGroupService securityGroupService) {
         super(PrivateCloudType.OPEN_STACK, true);
         this.apiProvider = apiProvider;
         this.dbServicesProvider = dbServicesProvider;
@@ -109,6 +112,7 @@ public class OpenStackAgentRegularScheduler extends AbstractScheduler {
         this.regionService = regionService;
         this.auditEventSender = auditEventSender;
         this.locker = locker;
+        this.securityGroupService = securityGroupService;
     }
 
     @Override
@@ -292,6 +296,7 @@ public class OpenStackAgentRegularScheduler extends AbstractScheduler {
                 () -> dbServicesProvider.getServerDbService().saveServerConfig(serverConfig));
             generateAuditEventInternally(region, tenant, serverConfig, serverState, null, server,
                 false, true, volumeMap);
+            securityGroupService.attachAdminSecurityGroup(tenant, region, serverConfig);
         }
     }
 
