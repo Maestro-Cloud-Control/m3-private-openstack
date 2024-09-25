@@ -25,16 +25,17 @@ import io.maestro3.agent.model.base.PrivateCloudType;
 import io.maestro3.agent.model.compute.DiskConfig;
 import io.maestro3.agent.model.enums.OpenStackVersion;
 import io.maestro3.agent.model.flavor.OpenStackFlavorConfig;
-import io.maestro3.agent.model.network.impl.AutoNetworkingPolicy;
 import io.maestro3.agent.model.network.NetworkingPolicy;
-import io.maestro3.agent.model.network.SecurityGroupType;
-import io.maestro3.agent.model.server.OpenStackSecurityGroupInfo;
+import io.maestro3.agent.model.network.SecurityModeConfiguration;
+import io.maestro3.agent.model.network.impl.AutoNetworkingPolicy;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -55,7 +56,7 @@ public class OpenStackRegionConfig extends BaseAmqpRegion<OpenStackFlavorConfig>
     private DiskConfig serverDiskConfig;
     private OpenStackVersion osVersion = OpenStackVersion.OTHER;
     private NetworkingPolicy networkingPolicy;
-    private Map<SecurityGroupType, OpenStackSecurityGroupInfo> securityGroupMapping;
+    private Map<String, SecurityModeConfiguration> securityModeConfigurations = new HashMap<>();
     private int allowedIpOperationsMinutes = 3;
 
     public OpenStackRegionConfig() {
@@ -71,22 +72,6 @@ public class OpenStackRegionConfig extends BaseAmqpRegion<OpenStackFlavorConfig>
         this.allowedIpOperationsMinutes = allowedIpOperationsMinutes;
     }
 
-    public void setSecurityGroupMapping(Map<SecurityGroupType, OpenStackSecurityGroupInfo> securityGroupMapping) {
-        this.securityGroupMapping = securityGroupMapping;
-    }
-
-    public OpenStackSecurityGroupInfo getAdminSecurityGroupId(SecurityGroupType securityGroupType) {
-        return securityGroupMapping != null ? securityGroupMapping.get(securityGroupType) : null;
-    }
-
-    public void addAdminSecurityGroup(SecurityGroupType securityGroupType, OpenStackSecurityGroupInfo group) {
-        if (securityGroupMapping == null) {
-            securityGroupMapping = new HashMap<>();
-        }
-
-        securityGroupMapping.put(securityGroupType, group);
-    }
-
     public int getRegionNumber() {
         return regionNumber;
     }
@@ -98,6 +83,26 @@ public class OpenStackRegionConfig extends BaseAmqpRegion<OpenStackFlavorConfig>
     public OpenStackRegionConfig setNetworkingPolicy(NetworkingPolicy networkingPolicy) {
         this.networkingPolicy = networkingPolicy;
         return this;
+    }
+
+    public Map<String, SecurityModeConfiguration> getSecurityModeConfigurations() {
+        return securityModeConfigurations;
+    }
+
+    public Optional<SecurityModeConfiguration> getDefaultSecurityModeConfiguration() {
+        return securityModeConfigurations.values().stream()
+                .filter(SecurityModeConfiguration::isDefaultMode)
+                .findFirst();
+    }
+
+    public Optional<SecurityModeConfiguration> getSecurityModeConfiguration(String modeName) {
+        return securityModeConfigurations.values().stream()
+                .filter(mode -> Objects.equals(modeName, mode.getName()))
+                .findFirst();
+    }
+
+    public void setSecurityModeConfigurations(Map<String, SecurityModeConfiguration> securityModeConfigurations) {
+        this.securityModeConfigurations = securityModeConfigurations;
     }
 
     public OpenStackVersion getOsVersion() {

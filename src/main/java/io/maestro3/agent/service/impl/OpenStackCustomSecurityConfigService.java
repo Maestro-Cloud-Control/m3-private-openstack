@@ -19,7 +19,6 @@ package io.maestro3.agent.service.impl;
 
 import io.maestro3.agent.dao.IOpenStackCustomSecurityConfigDao;
 import io.maestro3.agent.model.network.Direction;
-import io.maestro3.agent.model.network.SecurityGroupType;
 import io.maestro3.agent.model.network.impl.SecurityGroupExtension;
 import io.maestro3.agent.service.IOpenStackCustomSecurityConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +41,8 @@ public class OpenStackCustomSecurityConfigService extends CustomSecurityConfigSe
     }
 
     @Override
-    public List<SecurityGroupExtension> findByZoneIds(Set<String> zoneIds, SecurityGroupType securityGroupType, Direction direction) {
+    public List<SecurityGroupExtension> findByZoneIds(Set<String> zoneIds, Direction direction) {
         Assert.notEmpty(zoneIds, "zoneIds can not be null or empty");
-        return openStackCustomSecurityConfigDao.find(zoneIds, securityGroupType, direction);
+        return openStackCustomSecurityConfigDao.find(zoneIds, direction);
     }
 }

@@ -19,7 +19,6 @@ package io.maestro3.agent.service.impl;
 
 import io.maestro3.agent.dao.IOpenStackTenantRepository;
 import io.maestro3.agent.exception.ReadableAgentException;
-import io.maestro3.agent.model.network.impl.ProjectSource;
 import io.maestro3.agent.model.network.impl.ip.IPState;
 import io.maestro3.agent.model.network.impl.ip.OpenStackFloatingIp;
 import io.maestro3.agent.model.network.impl.ip.OpenStackStaticIpAddress;
@@ -53,7 +52,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -114,10 +112,6 @@ public class OpenStackBasedOnFloatingIpsNetworkService extends OpenStackNetworkS
                 openStackFloatingIp.setReservedBy(floatingIpAddressParameters.getReservedInstanceId());
             }
             onStaticIpAllocated(project, openStackFloatingIp);
-            ProjectSource staticIPResource = ProjectSource.staticIPResource(project.getTenantAlias(), zone.getRegionAlias(),
-                openStackFloatingIp.getIpAddress(), openStackFloatingIp.getIpAddress());
-            openStackSecurityGroupService.updateProjectDefaultSecurityGroup(project,
-                Collections.singleton(staticIPResource), null);
         } catch (OpenStackConflictException e) {
             throw new ReadableAgentException("Floating IPs limit exceeded.");
         } catch (OSClientException error) {
@@ -139,9 +133,9 @@ public class OpenStackBasedOnFloatingIpsNetworkService extends OpenStackNetworkS
         }
 
         return AllocateFloatingIpAddressParameters.builder()
-            .fixedIp(parameters.getFixedIp())
-            .networkId(parameters.getNetworkId())
-            .build();
+                .fixedIp(parameters.getFixedIp())
+                .networkId(parameters.getNetworkId())
+                .build();
     }
 
     private FloatingIp getFloatingIp(IOpenStackClient client, AllocateFloatingIpAddressParameters floatingIpAddressParameters,
@@ -150,7 +144,7 @@ public class OpenStackBasedOnFloatingIpsNetworkService extends OpenStackNetworkS
         String networkId = resolveNetworkId(floatingIpAddressParameters, project, client);
         if (floatingIpAddressParameters != null && StringUtils.isNotBlank(floatingIpAddressParameters.getPortId())) {
             floatingIp = client.allocateFloatingIp(networkId, floatingIpAddressParameters.getPortId(),
-                floatingIpAddressParameters.getFloatingIp());
+                    floatingIpAddressParameters.getFloatingIp());
         } else {
             floatingIp = client.allocateFloatingIp(networkId, null);
         }
@@ -206,19 +200,19 @@ public class OpenStackBasedOnFloatingIpsNetworkService extends OpenStackNetworkS
 
             if (network.isExternal()) {
                 throw new ReadableAgentException(
-                    String.format("IpAddress %s is not reachable from VM %s network", ipAddress.getIpAddress(), instance.getNameAlias()));
+                        String.format("IpAddress %s is not reachable from VM %s network", ipAddress.getIpAddress(), instance.getNameAlias()));
             }
 
             String externalNetworkId = getExternalNetworkId(network, client);
             SubnetApiFilter filter = new SubnetApiFilter().inNetwork(externalNetworkId);
             List<NovaSubnet> subnets = client.toApi().networking().subnets().list(filter);
             Set<String> cidrs = subnets.stream()
-                .map(NovaSubnet::getCidr)
-                .collect(Collectors.toSet());
+                    .map(NovaSubnet::getCidr)
+                    .collect(Collectors.toSet());
             boolean reachable = SubnetUtils.isInSubnets(ipAddress.getIpAddress(), cidrs);
             if (!reachable) {
                 throw new ReadableAgentException(
-                    String.format("IpAddress %s is not reachable from VM %s network", ipAddress.getIpAddress(), instance.getNameAlias()));
+                        String.format("IpAddress %s is not reachable from VM %s network", ipAddress.getIpAddress(), instance.getNameAlias()));
             }
         } catch (OSClientException e) {
             throw new ReadableAgentException("OpenStack error occurred: " + e.getMessage(), e);

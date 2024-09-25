@@ -20,7 +20,6 @@ package io.maestro3.agent.model.network.impl;
 import io.maestro3.agent.model.network.CustomSecurityConfig;
 import io.maestro3.agent.model.network.Direction;
 import io.maestro3.agent.model.network.SecurityConfigType;
-import io.maestro3.agent.model.network.SecurityGroupType;
 
 import java.util.Objects;
 
@@ -29,7 +28,6 @@ public class SecurityGroupExtension extends CustomSecurityConfig {
 
     private String ipRange;
     private String zoneId;
-    private SecurityGroupType securityGroupType;
     private Direction direction;
     private String protocol;
     private String description;
@@ -54,14 +52,6 @@ public class SecurityGroupExtension extends CustomSecurityConfig {
 
     public void setZoneId(String zoneId) {
         this.zoneId = zoneId;
-    }
-
-    public SecurityGroupType getSecurityGroupType() {
-        return securityGroupType;
-    }
-
-    public void setSecurityGroupType(SecurityGroupType securityGroupType) {
-        this.securityGroupType = securityGroupType;
     }
 
     public Direction getDirection() {
@@ -115,7 +105,6 @@ public class SecurityGroupExtension extends CustomSecurityConfig {
         if (!Objects.equals(toPort, that.toPort)) return false;
         if (!Objects.equals(ipRange, that.ipRange)) return false;
         if (!Objects.equals(zoneId, that.zoneId)) return false;
-        if (securityGroupType != that.securityGroupType) return false;
         if (direction != that.direction) return false;
         return Objects.equals(description, that.description);
     }
@@ -125,7 +114,6 @@ public class SecurityGroupExtension extends CustomSecurityConfig {
         int result = getProtocol() != null ? getProtocol().hashCode() : 0;
         result = 31 * result + (ipRange != null ? ipRange.hashCode() : 0);
         result = 31 * result + (zoneId != null ? zoneId.hashCode() : 0);
-        result = 31 * result + (securityGroupType != null ? securityGroupType.hashCode() : 0);
         result = 31 * result + (direction != null ? direction.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         result = 31 * result + (fromPort != null ? fromPort.hashCode() : 0);

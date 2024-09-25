@@ -17,11 +17,8 @@
 
 package io.maestro3.agent.service.impl;
 
-import io.maestro3.agent.dao.IOpenStackRegionRepository;
-import io.maestro3.agent.dao.IOpenStackTenantRepository;
 import io.maestro3.agent.dao.ServerConfigDao;
 import io.maestro3.agent.exception.ReadableAgentException;
-import io.maestro3.agent.model.network.impl.OpenStackProjectCustomSecurityGroup;
 import io.maestro3.agent.model.region.OpenStackRegionConfig;
 import io.maestro3.agent.model.server.OpenStackNetworkInterfaceInfo;
 import io.maestro3.agent.model.server.OpenStackSecurityGroupInfo;
@@ -51,18 +48,13 @@ public class OpenStackMoveToVlanService implements IOpenStackMoveToVlanService {
 
     private static final Logger LOG = LogManager.getLogger(OpenStackMoveToVlanService.class);
 
-    private IOpenStackRegionRepository regionRepository;
-    private IOpenStackTenantRepository tenantRepository;
     private OpenStackApiProvider apiProvider;
     private ServerConfigDao serverConfigDao;
     private IOpenStackProjectCustomSecurityGroupService projectCustomSecurityGroupService;
 
     @Autowired
-    public OpenStackMoveToVlanService(IOpenStackRegionRepository regionRepository, IOpenStackTenantRepository tenantRepository,
-                                      OpenStackApiProvider apiProvider, ServerConfigDao serverConfigDao,
+    public OpenStackMoveToVlanService(OpenStackApiProvider apiProvider, ServerConfigDao serverConfigDao,
                                       IOpenStackProjectCustomSecurityGroupService projectCustomSecurityGroupService) {
-        this.regionRepository = regionRepository;
-        this.tenantRepository = tenantRepository;
         this.apiProvider = apiProvider;
         this.serverConfigDao = serverConfigDao;
         this.projectCustomSecurityGroupService = projectCustomSecurityGroupService;
@@ -102,11 +94,11 @@ public class OpenStackMoveToVlanService implements IOpenStackMoveToVlanService {
         Port newPort = null;
         try {
             CreatePortRequest request = CreatePortRequest.build()
-                .withIpAddress(ipAddress)
-                .withMacAddress(sourcePort.getMacAddress())
-                .withNetworkId(targetNetworkId)
-                .withSecurityGroupId(openStackTenant.getSecurityGroupId())
-                .get();
+                    .withIpAddress(ipAddress)
+                    .withMacAddress(sourcePort.getMacAddress())
+                    .withNetworkId(targetNetworkId)
+                    .withSecurityGroupId(openStackTenant.getSecurityGroupId())
+                    .get();
             newPort = openStackApiByProjectUser.networking().ports().create(request);
         } catch (OSClientException e) {
             rollbackPortRemoving(openStackApi, sourcePort, instance);
@@ -131,9 +123,9 @@ public class OpenStackMoveToVlanService implements IOpenStackMoveToVlanService {
             networkInterfaceInfo.setVlanName(vlanName);
             Set<OpenStackSecurityGroupInfo> securityGroups = getSecurityGroupIds(region, openStackTenant, instance);
             openStackApi.networking().ports().updateSecurityGroups(targetPort.getId(),
-                securityGroups.stream()
-                    .map(OpenStackSecurityGroupInfo::getNativeId)
-                    .collect(Collectors.toList()));
+                    securityGroups.stream()
+                            .map(OpenStackSecurityGroupInfo::getNativeId)
+                            .collect(Collectors.toList()));
             networkInterfaceInfo.setSecurityGroupInfos(securityGroups);
         } catch (OSClientException e) {
             LOG.error(e.getMessage());
@@ -151,16 +143,13 @@ public class OpenStackMoveToVlanService implements IOpenStackMoveToVlanService {
             securityGroupIds.add(new OpenStackSecurityGroupInfo(tenant.getSecurityGroupId(), tenant.getSecurityGroupName()));
         }
 
-        Set<OpenStackSecurityGroupInfo> adminSecurityGroupIds = tenant.getSecurityGroupTypes().stream()
-            .map(region::getAdminSecurityGroupId)
-            .filter(sg -> sg != null && StringUtils.isNotBlank(sg.getNativeId()))
-            .collect(Collectors.toSet());
-        securityGroupIds.addAll(adminSecurityGroupIds);
+        region.getSecurityModeConfiguration(tenant.getSecurityMode())
+                .ifPresent(configuration -> securityGroupIds.add(new OpenStackSecurityGroupInfo(configuration.getAdminSecurityGroupId(), null)));
 
         Set<OpenStackSecurityGroupInfo> customGroupIds = projectCustomSecurityGroupService.findForInstance(instance)
-            .stream()
-            .map(info -> new OpenStackSecurityGroupInfo(info.getOpenStackId(), info.getName()))
-            .collect(Collectors.toSet());
+                .stream()
+                .map(info -> new OpenStackSecurityGroupInfo(info.getOpenStackId(), info.getName()))
+                .collect(Collectors.toSet());
         securityGroupIds.addAll(customGroupIds);
 
         return securityGroupIds;
@@ -171,17 +160,17 @@ public class OpenStackMoveToVlanService implements IOpenStackMoveToVlanService {
             openStackApi.compute().portInterfaces().attach(openStackInstanceId, port.getId());
         } catch (OSClientException e) {
             handleException(String.format("Rollback detach action failed. Tried to attach server %s to an old port %s.",
-                openStackInstanceId, port.getId()), e.getMessage());
+                    openStackInstanceId, port.getId()), e.getMessage());
         }
     }
 
     private void rollbackPortRemoving(IOpenStackApi openStackApi, Port port, OpenStackServerConfig instance) {
         try {
             openStackApi.compute().portInterfaces()
-                .attach(instance.getNativeId(), port.getNetworkId(), instance.getNetworkInterfaceInfo().getPrivateIP());
+                    .attach(instance.getNativeId(), port.getNetworkId(), instance.getNetworkInterfaceInfo().getPrivateIP());
         } catch (OSClientException e) {
             handleException(String.format("Rollback create removed port and attach actions failed for server %s with IP %s.",
-                instance.getNativeId(), instance.getNetworkInterfaceInfo().getPrivateIP()), e.getMessage());
+                    instance.getNativeId(), instance.getNetworkInterfaceInfo().getPrivateIP()), e.getMessage());
         }
     }
 

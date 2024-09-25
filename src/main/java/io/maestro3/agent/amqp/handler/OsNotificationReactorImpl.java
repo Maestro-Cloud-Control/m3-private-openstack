@@ -17,17 +17,13 @@
 
 package io.maestro3.agent.amqp.handler;
 
-import io.maestro3.agent.cadf.CadfAuditEventSender;
-import io.maestro3.agent.cadf.openstack.INotificationConverterFactory;
-import io.maestro3.agent.cadf.openstack.converter.IQualifiedCadfConverter;
 import io.maestro3.agent.model.notification.Notification;
-import io.maestro3.sdk.v3.model.audit.AuditEventGroupType;
-import io.maestro3.cadf.model.CadfAuditEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -36,30 +32,17 @@ public class OsNotificationReactorImpl implements OsNotificationReactor {
 
     private static final Logger LOG = LoggerFactory.getLogger(OsNotificationReactorImpl.class);
 
-    private final CadfAuditEventSender eventSender;
-    private final INotificationConverterFactory notificationConverterFactory;
+    private final Collection<IOsNotificationHandler> handlers;
 
 
     @Autowired
-    public OsNotificationReactorImpl(CadfAuditEventSender eventSender,
-                                     INotificationConverterFactory notificationConverterFactory) {
-        this.eventSender = eventSender;
-        this.notificationConverterFactory = notificationConverterFactory;
+    public OsNotificationReactorImpl(List<IOsNotificationHandler> handlers) {
+        this.handlers = handlers;
     }
 
     @Override
     public void reactOnNotification(Notification notification) {
         LOG.info(notification.getOriginalJson());
-        IQualifiedCadfConverter cadfConverter = notificationConverterFactory.getConverter(notification);
-
-        if (cadfConverter == null) {
-            LOG.warn("Action with type {} is not supported", notification.getEventType());
-            return;
-        }
-
-        CadfAuditEvent event = cadfConverter.convert(notification);
-        List<AuditEventGroupType> outputEventGroups = cadfConverter.getOutputEventGroups();
-
-        eventSender.sendCadfAuditEvent(event, outputEventGroups);
+        handlers.forEach(handler -> handler.handle(notification));
     }
 }

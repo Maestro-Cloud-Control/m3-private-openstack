@@ -23,9 +23,9 @@ import io.maestro3.agent.model.notification.Notification;
 public interface OsNotificationReactor {
 
     /**
-     * Reacts on OpenSack push notification.
+     * Reacts on OpenStack push notification.
      *
-     * @param notification deserialized OpenSack push notification
+     * @param notification deserialized OpenStack push notification
      */
     void reactOnNotification(Notification notification);
 }

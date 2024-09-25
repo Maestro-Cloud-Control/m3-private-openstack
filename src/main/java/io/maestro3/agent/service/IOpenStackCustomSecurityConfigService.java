@@ -18,7 +18,6 @@
 package io.maestro3.agent.service;
 
 import io.maestro3.agent.model.network.Direction;
-import io.maestro3.agent.model.network.SecurityGroupType;
 import io.maestro3.agent.model.network.impl.SecurityGroupExtension;
 
 import java.util.List;
@@ -27,5 +26,5 @@ import java.util.Set;
 
 public interface IOpenStackCustomSecurityConfigService extends ICustomSecurityConfigService<SecurityGroupExtension> {
 
-    List<SecurityGroupExtension> findByZoneIds(Set<String> zoneIds, SecurityGroupType securityGroupType, Direction direction);
+    List<SecurityGroupExtension> findByZoneIds(Set<String> zoneIds, Direction direction);
 }
