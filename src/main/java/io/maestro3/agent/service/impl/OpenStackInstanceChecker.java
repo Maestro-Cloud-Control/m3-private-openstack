@@ -156,6 +156,7 @@ public class OpenStackInstanceChecker extends AbstractInstanceChecker<OpenStackT
 
     @Override
     protected void processConfigChangedInstances(OpenStackTenant tenant, OpenStackRegionConfig region, List<Pair<OpenStackServerConfig, SdkInstance>> newInstances) {
+        // TODO: 27.07.2021 check instance configuration cpu/ram/storage/volumes/tags and publish CadfActions.configure() if needed
     }
 
     @Override

@@ -17,7 +17,6 @@
 
 package io.maestro3.agent.converter;
 
-import io.maestro3.sdk.internal.util.JsonUtils;
 import io.maestro3.sdk.v3.core.M3ActionParamNames;
 import io.maestro3.sdk.v3.core.M3ApiAction;
 import io.maestro3.sdk.v3.model.SdkCloud;
@@ -52,7 +51,19 @@ public final class M3ApiActionInverter {
 
     public static RunInstanceRequest toRunInstanceRequest(M3ApiAction apiAction) {
         Map<String, Object> params = apiAction.getParams();
-        return JsonUtils.parseMap(params, RunInstanceRequest.class);
+        return RunInstanceRequest.builder()
+                .withTenantName(String.valueOf(params.get(M3ActionParamNames.TENANT_NAME)))
+                .withRegion(String.valueOf(params.get(M3ActionParamNames.REGION)))
+                .withInstanceName(String.valueOf(params.get(M3ActionParamNames.INSTANCE_NAME)))
+                .withShape(String.valueOf(params.get("shape")))
+                .withImageId(String.valueOf(params.get("imageId")))
+                .withIp((String) params.get("ip"))
+                .withInitScript(String.valueOf(params.get(M3ActionParamNames.INIT_SCRIPT)))
+                .withKeyName(String.valueOf(params.get(M3ActionParamNames.KEY_NAME)))
+                .withOwner(String.valueOf(params.get(M3ActionParamNames.OWNER)))
+                .withCount(Integer.valueOf(String.valueOf(params.get(M3ActionParamNames.COUNT))))
+                .build();
+
     }
 
     public static StartInstanceRequest toStartInstanceRequest(M3ApiAction apiAction) {

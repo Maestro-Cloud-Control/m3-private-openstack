@@ -145,6 +145,7 @@ public class InstanceEventCadfConverter extends AbstractEventCadfConverter {
             .withAction(action)
             .withEventTime(DateUtils.formatDate(date, DateUtils.CADF_FORMAT_TIME))
             .withEventType(CadfEventType.ACTIVITY)
+            // TODO: 2/12/2019 provide normal initiator
             .withInitiator(system)
             .withObserver(system)
             .withTarget(target)
@@ -262,15 +263,18 @@ public class InstanceEventCadfConverter extends AbstractEventCadfConverter {
         cadfAttachment.setContent(privateIp);
         result.add(cadfAttachment);
 
+        // TODO: 2/12/2019 change handling of missed attachments on server side
         cadfAttachment = new CadfAttachment<>("string", "publicIp");
         cadfAttachment.setContent(null);
         result.add(cadfAttachment);
 
+        // TODO: 2/12/2019 change handling of missed attachments on server side
         cadfAttachment = new CadfAttachment<>("string", "privateDnsName");
         String privateDns = server == null ? null : server.getNetworkInterfaceInfo().getPrivateDns();
         cadfAttachment.setContent(privateDns);
         result.add(cadfAttachment);
 
+        // TODO: 2/12/2019 change handling of missed attachments on server side
         cadfAttachment = new CadfAttachment<>("string", "publicDnsName");
         cadfAttachment.setContent(null);
         result.add(cadfAttachment);
@@ -357,6 +361,12 @@ public class InstanceEventCadfConverter extends AbstractEventCadfConverter {
             .withResult(config.getMemorySizeMb())
             .build();
         result.add(measurement);
+
+        // TODO: 2/11/2019 support
+//        boolean isCustomShape = CUSTOM.getName().equalsIgnoreCase(billableInstance.getShape());
+//        if (isCustomShape) {
+//            addMeasurement(result, BillableResourceNames.INSTANCE_CUSTOM_SHAPE, "1");
+//        }
 
         String osType = (String) notification.getOriginalNotification().get("os_type");
         if ("windows".equals(osType)) {

@@ -25,6 +25,7 @@ import java.util.Map;
 
 public enum ServiceType {
 
+    // TODO: 5/25/2020 need to specify endpoints - empty works as it worked before
     IDENTITY("keystone", "", ""),
     COMPUTE("nova", "compute", ":8774"),
     IMAGE("glance", "", ""),

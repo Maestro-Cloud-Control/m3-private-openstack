@@ -53,6 +53,7 @@ public class OpenStackNotificaionTransformer {
     private final Type mapType = new TypeToken<Map<String, Object>>() {
     }.getType();
 
+    //TODO: check if 'yyyy-MM-dd HH:mm:ss.SSSSSS' pattern is correct
     private Gson gson = new GsonBuilder()
             .setDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS")
             .registerTypeAdapter(

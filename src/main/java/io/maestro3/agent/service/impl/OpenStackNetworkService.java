@@ -327,7 +327,7 @@ abstract class OpenStackNetworkService implements IVirtOpenStackNetworkService {
     private void refreshInstance(final OpenStackTenant project, final OpenStackServerConfig instance) {
         try {
 //            UpdateResourceContext updateResourceContext = new UpdateResourceContext(systemContext, (OpenStackProject) project, UpdateResourceInitiator.MANUAL);
-//            instancesService.updateOneInstance(updateResourceContext, instance);
+//            instancesService.updateOneInstance(updateResourceContext, instance); todo implement single instance update
         } catch (Exception e) {
             LOG.error("Unable to refresh instance.", e);
         }

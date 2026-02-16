@@ -95,6 +95,7 @@ public class OsDescribeInstanceHandler implements IM3ApiHandler {
             return openStackApiProvider.openStack(tenant, region).compute().servers().list();
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new M3PrivateAgentException(e.getMessage());
         }
     }

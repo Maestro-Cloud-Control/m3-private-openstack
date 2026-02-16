@@ -83,7 +83,7 @@ public class OSClient implements IOSClient {
     private String regionName; // OpenStack region name
     private KeystoneDomainCredentials credentials;
     private Access access;
-    private SimpleHttpClient client; //
+    private SimpleHttpClient client; // TODO: migrate to more newer implementation
     private Map<ServiceType, Endpoint> serviceEndpointsCached;
     private RequestHandler interceptor;
     private ResponseHandler responseHandler;

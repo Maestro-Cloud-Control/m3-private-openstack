@@ -54,12 +54,12 @@ public class InstanceEvent extends Event {
     private List<Ip> fixedIps; // list of ip addresses assigned to instance
 
     @SerializedName("memory_mb")
-    private String memoryMb; // memory allocation for this instance
+    private String memoryMb; // memory allocation for this instance TODO: maybe change to int
 
     @SerializedName("disk_gb")
-    private String diskGb; // disk allocation for this instance
+    private String diskGb; // disk allocation for this instance TODO: maybe change to int
 
-    public static class Ip {
+    public static class Ip { // TODO investigate real structure
 
         @SerializedName("floating_ips")
         private List<Map<String, Object>> floatingIps;

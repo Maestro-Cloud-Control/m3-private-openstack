@@ -94,6 +94,7 @@ List<NovaKeyPair> keyPairs = describeKeys(region, tenant);
             return openStackApiProvider.openStack(tenant, region).compute().keyPairs().list();
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new M3PrivateAgentException(e.getMessage());
         }
     }

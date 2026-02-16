@@ -92,6 +92,7 @@ String name = request.getName();
             openStackApiProvider.openStack(tenant, region).compute().keyPairs().deleteKeyPair(name);
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new M3PrivateAgentException(e.getMessage());
         }
     }

@@ -130,6 +130,7 @@ public class OsTerminateInstanceHandler extends AbstractInstanceHandler implemen
             openStackApiProvider.openStack(tenant, region).compute().servers().delete(server.getNativeId());
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new M3PrivateAgentException(e.getMessage());
         }
     }

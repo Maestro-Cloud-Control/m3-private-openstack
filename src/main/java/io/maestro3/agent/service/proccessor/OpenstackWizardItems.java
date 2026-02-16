@@ -54,7 +54,7 @@ public class OpenstackWizardItems {
         for (OpenStackRegionConfig osRegion : osRegions) {
             SdkOptionItem optionItem = PrivateWizardUtils.getOptionItem(osRegion.getRegionAlias(), false);
             if (osRegion.getRegionAlias().equals(regionName)) {
-                optionItem.setSelect(buildUseFilledParameters());
+                optionItem.setSelect(List.of(buildUseFilledParameters()));
                 optionItem.setSelected(true);
             }
             options.add(optionItem);

@@ -85,6 +85,7 @@ OpenStackServerConfig server = serverDbService.findServer(region.getId(), tenant
             openStackApiProvider.openStack(tenant, region).compute().servers().stop(server.getNativeId());
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new M3PrivateAgentException(e.getMessage());
         }
     }

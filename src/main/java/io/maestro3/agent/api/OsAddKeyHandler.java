@@ -89,6 +89,7 @@ public class OsAddKeyHandler implements IM3ApiHandler {
             openStackApiProvider.openStack(tenant, region).compute().keyPairs().importKeyPair(name, publicKey);
         } catch (OSClientException e) {
             LOG.error(e.getMessage(), e);
+            // TODO: add extended Exception handling
             throw new ReadableAgentException(e.getMessage());
         }
     }

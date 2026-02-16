@@ -316,7 +316,7 @@ class ManualModeNetworkingProvider extends AbstractNetworkingProvider {
             // Only A-typed DNS-record for manual-type regions
 //            DnsName dnsName = (DnsName) createDnsRecordQuietly(progress.getProject(), progress.getInstanceName(), ipAddress, DnsRecordType.A);
 //            if (dnsName != null) {
-//                progress.setDnsName(dnsName);
+//                progress.setDnsName(dnsName); todo implement dns records
 //            }
         }
         if (CollectionUtils.isNotEmpty(networkingConfiguration.getNetworkIds())) {

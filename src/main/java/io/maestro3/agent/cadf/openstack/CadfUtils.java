@@ -239,10 +239,12 @@ public interface CadfUtils {
             result.add(cadfAttachment);
         }
 
+        // TODO: 2/12/2019 change handling of missed attachments on server side
         cadfAttachment = new CadfAttachment<>(STRING_CONTENT_TYPE, "publicIp");
         cadfAttachment.setContent(null);
         result.add(cadfAttachment);
 
+        // TODO: 2/12/2019 change handling of missed attachments on server side
         cadfAttachment = new CadfAttachment<>(STRING_CONTENT_TYPE, "publicDnsName");
         cadfAttachment.setContent(null);
         result.add(cadfAttachment);

@@ -32,7 +32,7 @@ public class Notification {
     @SerializedName("_unique_id")
     private String uniqueId;
 
-    private Map<String, Object> payload;
+    private Map<String, Object> payload; // TODO should be changed to Event or InstanceEvent or InstanceCreationEvent once event structure is finalized
 
     private String originalJson;
 

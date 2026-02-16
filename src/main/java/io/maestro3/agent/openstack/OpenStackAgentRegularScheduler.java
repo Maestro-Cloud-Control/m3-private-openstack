@@ -385,7 +385,7 @@ public class OpenStackAgentRegularScheduler extends AbstractScheduler {
         } else {
             if (instanceStateChanged) {
                 if (currentServerState == ServerStateEnum.ERROR ||
-                    currentServerState == ServerStateEnum.TERMINATED) {
+                    currentServerState == ServerStateEnum.TERMINATED) {        // TODO: 15.03.2021 Temporary solution. Should be removed when we find the reason of inconsistent between cadf action and instance state
                     return CadfActions.delete();
                 } else {
                     return OpenStackEventTypeActionMapping.getActionByPreviousState(previousServerState);
